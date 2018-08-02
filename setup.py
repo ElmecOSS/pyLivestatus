@@ -9,13 +9,14 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(name='pyLivestatus',
-      version='0.1.3',
+      version='0.1.4',
       url='https://github.com/ElmecOSS/pyLivestatus',
       license='MIT',
       author='Luca Depaoli',
       author_email='luca.depaoli@elmec.it',
       description='Python library for Livestatus Integration',
       long_description=long_description,
+      long_description_content_type="text/markdown",
       keywords = ['pyLivestatus', 'nagios', 'nagios socket'],
       packages=setuptools.find_packages(),
       zip_safe=False,

@@ -2,7 +2,7 @@
 
 This package allows to access [Check MK Livestatus](https://mathias-kettner.de/checkmk_livestatus.html) via python
 
-#Usage
+# Usage
 
 ```python
 from pyLivestatus import Livestatus
