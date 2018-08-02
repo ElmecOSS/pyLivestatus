@@ -1,8 +1,8 @@
 import telnetlib
 import time
 
-import columns
-from exceptions import HostNotFoundException, NotFoundException
+from .columns import *
+from .exceptions import HostNotFoundException, NotFoundException
 
 
 class Livestatus:
@@ -74,41 +74,48 @@ class Livestatus:
 
     def get_hosts(self):
         try:
-            query = u"GET hosts\nColumns: " + u' '.join(columns.host) + u'\n\n'
-            return self._get_by_query_multi(query, columns.host)
+            query = u"GET hosts\nColumns: " + u' '.join(host) + u'\n\n'
+            return self._get_by_query_multi(query, host)
         except NotFoundException:
             return []
 
     def get_host(self, search_host):
-        query = u"GET hosts\nColumns: {}\nFilter: host_name = {}\n\n".format(u' '.join(columns.host), search_host)
-        return self._get_by_query_single(query, columns.host)
+        query = u"GET hosts\nColumns: {}\nFilter: host_name = {}\n\n".format(u' '.join(host), search_host)
+        return self._get_by_query_single(query, host)
 
     def get_services(self, search_host):
         try:
             self.get_host(search_host)
         except NotFoundException:
             raise HostNotFoundException
-        query = u"GET services\nColumns: {}\nFilter: host_name = {}\n\n".format(u' '.join(columns.service), search_host)
-        return self._get_by_query_multi(query, columns.service)
+        query = u"GET services\nColumns: {}\nFilter: host_name = {}\n\n".format(u' '.join(service), search_host)
+        return self._get_by_query_multi(query, service)
+
+    def get_all_services(self):
+        try:
+            query = u"GET services\nColumns: {}\n\n".format(u' '.join(service))
+            return self._get_by_query_multi(query, service)
+        except NotFoundException:
+            return []
 
     def get_hostgroups(self):
         try:
-            query = u"GET hostgroups\nColumns: {}\n\n".format(u' '.join(columns.hostgroup))
-            return self._get_by_query_multi(query, columns.hostgroup)
+            query = u"GET hostgroups\nColumns: {}\n\n".format(u' '.join(hostgroup))
+            return self._get_by_query_multi(query, hostgroup)
         except NotFoundException:
             return []
 
     def get_servicegroups(self):
         try:
-            query = u"GET servicegroups\nColumns: {}\n\n".format(u' '.join(columns.servicegroup))
-            return self._get_by_query_multi(query, columns.servicegroup)
+            query = u"GET servicegroups\nColumns: {}\n\n".format(u' '.join(servicegroup))
+            return self._get_by_query_multi(query, servicegroup)
         except NotFoundException:
             return []
 
     def get_comments(self):
         try:
-            query = u"GET comments\nColumns: {}\n\n".format(u' '.join(columns.comment))
-            return self._get_by_query_multi(query, columns.comment)
+            query = u"GET comments\nColumns: {}\n\n".format(u' '.join(comment))
+            return self._get_by_query_multi(query, comment)
         except NotFoundException:
             return []
 
