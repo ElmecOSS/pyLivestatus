@@ -16,9 +16,9 @@ class Livestatus:
     def _send_raw_command(self, cmd, want_response=True):
         self.livestatus = telnetlib.Telnet(self.ip, self.port)
 
-        self.livestatus.write(cmd.encode('ascii'))
+        self.livestatus.write(cmd.encode('utf-8'))
         if want_response:
-            response = self.livestatus.read_all().decode('ascii').rstrip(u'\n')
+            response = self.livestatus.read_all().decode('utf-8').rstrip(u'\n')
         else:
             response = u''
         self.livestatus.close()
@@ -47,13 +47,9 @@ class Livestatus:
             if attribute_list[attribute_index] == u'custom_variables':
                 this_data = self._get_custom_data(data[attribute_index])
             elif attribute_list[attribute_index] == u'members':
-                this_data = str(data[attribute_index]).split(',')[:-1]
+                this_data = data[attribute_index].encode('utf-8', 'replace').split(',')[:-1]
             else:
-                this_data = str(data[attribute_index])
-            try:
-                this_data = float(this_data)
-            except (ValueError, TypeError):
-                pass
+                this_data = data[attribute_index].encode('utf-8', 'replace')
             this_result[attribute_list[attribute_index]] = this_data
         return this_result
 
