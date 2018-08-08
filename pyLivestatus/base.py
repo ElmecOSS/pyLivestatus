@@ -123,6 +123,19 @@ class Livestatus:
         cmd = u"DISABLE_HOST_SVC_NOTIFICATIONS;{}".format(host)
         return self._send_command(cmd)
 
+    def set_service_disable_notification(self, host, svc):
+        cmd = u"DISABLE_SVC_NOTIFICATIONS;{};{}".format(host, svc)
+        return self._send_command(cmd)
+
+    def set_service_comment(self, host, svc, user, comment):
+        cmd = u"ADD_SVC_COMMENT;{};{};1;{};{}".format(host, svc, user, comment)
+        return self._send_command(cmd)
+
+    def set_service_disable_notifications_and_comment(self, host, svc, user, comment):
+        self.set_service_disable_notification(host, svc)
+        self.set_service_comment(host, svc, user, commend)
+        return
+
     def set_host_comment(self, host, user, comment):
         cmd = u"ADD_HOST_COMMENT;{};1;{};{}".format(host, user, comment)
         return self._send_command(cmd)

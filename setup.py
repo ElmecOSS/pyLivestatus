@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(name='pyLivestatus',
-      version='0.1.5',
+      version='0.1.6',
       url='https://github.com/ElmecOSS/pyLivestatus',
       license='MIT',
       author='Luca Depaoli',
