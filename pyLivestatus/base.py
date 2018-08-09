@@ -133,7 +133,7 @@ class Livestatus:
 
     def set_service_disable_notifications_and_comment(self, host, svc, user, comment):
         self.set_service_disable_notification(host, svc)
-        self.set_service_comment(host, svc, user, commend)
+        self.set_service_comment(host, svc, user, comment)
         return
 
     def set_host_comment(self, host, user, comment):
