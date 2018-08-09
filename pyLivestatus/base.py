@@ -45,7 +45,7 @@ class Livestatus:
         data = data.split(';')
         for attribute_index in range(len(attribute_list)):
             if attribute_list[attribute_index] == u'custom_variables':
-                this_data = self._get_custom_data(data[attribute_index])
+                this_data = self._get_custom_data(data[attribute_index].encode('utf-8', 'replace'))
             elif attribute_list[attribute_index] == u'members':
                 this_data = data[attribute_index].encode('utf-8', 'replace').split(',')[:-1]
             else:
