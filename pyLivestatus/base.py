@@ -18,7 +18,7 @@ class Livestatus:
 
         self.livestatus.write(cmd.encode('utf-8'))
         if want_response:
-            response = self.livestatus.read_all().decode('utf-8').rstrip(u'\n')
+            response = self.livestatus.read_all().decode('utf-8', 'replace').rstrip(u'\n')
         else:
             response = u''
         self.livestatus.close()
