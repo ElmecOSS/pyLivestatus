@@ -30,7 +30,7 @@ class Livestatus:
 
     @staticmethod
     def _get_custom_data(custom_data_list):
-        custom_data = str(custom_data_list).split(',')
+        custom_data = custom_data_list.decode('utf-8').split(u',')
         custom_data_list = {}
         for d in custom_data:
             nagios_macro_data = str(d).split('|')
@@ -42,7 +42,7 @@ class Livestatus:
 
     def _parse_item_data(self, data, attribute_list):
         this_result = {}
-        data = data.split(';')
+        data = data.split(';', len(attribute_list)-1)
         for attribute_index in range(len(attribute_list)):
             if attribute_list[attribute_index] == u'custom_variables':
                 this_data = self._get_custom_data(data[attribute_index].encode('utf-8', 'replace'))
@@ -58,7 +58,7 @@ class Livestatus:
         if response == u'':
             raise HostNotFoundException
         all_results = []
-        for result in response.split('\n'):
+        for result in response.split(u'\n'):
             all_results.append(self._parse_item_data(result, attribute_list))
         return all_results
 
@@ -70,13 +70,13 @@ class Livestatus:
 
     def get_hosts(self):
         try:
-            query = u"GET hosts\nColumns: " + u' '.join(host) + u'\n\n'
+            query = u"GET hosts\nColumns: " + u' '.join(host) + u'\nOutputFormat: csv\n\n'
             return self._get_by_query_multi(query, host)
         except NotFoundException:
             return []
 
     def get_host(self, search_host):
-        query = u"GET hosts\nColumns: {}\nFilter: host_name = {}\n\n".format(u' '.join(host), search_host)
+        query = u"GET hosts\nColumns: {}\nFilter: host_name = {}\nOutputFormat: csv\n\n".format(u' '.join(host), search_host)
         return self._get_by_query_single(query, host)
 
     def get_services(self, search_host):
@@ -84,33 +84,33 @@ class Livestatus:
             self.get_host(search_host)
         except NotFoundException:
             raise HostNotFoundException
-        query = u"GET services\nColumns: {}\nFilter: host_name = {}\n\n".format(u' '.join(service), search_host)
+        query = u"GET services\nColumns: {}\nFilter: host_name = {}\nOutputFormat: csv\n\n".format(u' '.join(service), search_host)
         return self._get_by_query_multi(query, service)
 
     def get_all_services(self):
         try:
-            query = u"GET services\nColumns: {}\n\n".format(u' '.join(service))
+            query = u"GET services\nColumns: {}\nOutputFormat: csv\n\n".format(u' '.join(service))
             return self._get_by_query_multi(query, service)
         except NotFoundException:
             return []
 
     def get_hostgroups(self):
         try:
-            query = u"GET hostgroups\nColumns: {}\n\n".format(u' '.join(hostgroup))
+            query = u"GET hostgroups\nColumns: {}\nOutputFormat: csv\n\n".format(u' '.join(hostgroup))
             return self._get_by_query_multi(query, hostgroup)
         except NotFoundException:
             return []
 
     def get_servicegroups(self):
         try:
-            query = u"GET servicegroups\nColumns: {}\n\n".format(u' '.join(servicegroup))
+            query = u"GET servicegroups\nColumns: {}\nOutputFormat: csv\n\n".format(u' '.join(servicegroup))
             return self._get_by_query_multi(query, servicegroup)
         except NotFoundException:
             return []
 
     def get_comments(self):
         try:
-            query = u"GET comments\nColumns: {}\n\n".format(u' '.join(comment))
+            query = u"GET comments\nColumns: {}\nOutputFormat: csv\n\n".format(u' '.join(comment))
             return self._get_by_query_multi(query, comment)
         except NotFoundException:
             return []

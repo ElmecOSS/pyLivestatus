@@ -109,7 +109,6 @@ host = [
 service = [
     u"acknowledgement_type",
     u"active_checks_enabled",
-    u"check_command",
     u"check_execution_time",
     u"check_interval",
     u"check_latency",
@@ -140,7 +139,6 @@ service = [
     u"last_time_unknown",
     u"last_time_warning",
     u"last_update",
-    u"long_plugin_output",
     u"max_attempts",
     u"modified_attributes",
     u"next_check",
@@ -152,7 +150,6 @@ service = [
     u"passive_checks_enabled",
     u"percent_state_change",
     u"performance_data",
-    u"plugin_output",
     u"problem_has_been_acknowledged",
     u"process_performance_data",
     u"retry_interval",
@@ -161,7 +158,10 @@ service = [
     u"should_be_scheduled",
     u"state_type",
     u"custom_variables",
-    u"pnpgraph_present"
+    u"pnpgraph_present",
+    u"plugin_output",
+    u"check_command",
+    u"long_plugin_output"
 ]
 
 hostgroup = [
