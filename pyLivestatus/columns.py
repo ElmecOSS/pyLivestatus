@@ -212,6 +212,22 @@ servicegroup = [
     u"worst_service_state"
 ]
 
+downtimes = [
+    u"host_name",
+    u"service_description",
+    u"author",
+    u"comment",
+    u"duration",
+    u"end_time",
+    u"entry_time",
+    u"fixed",
+    u"id",
+    u"is_service",
+    u"start_time",
+    u"triggered_by",
+    u"type"
+]
+
 comment = [
     u"author",
     u"comment",
