@@ -42,7 +42,7 @@ class Livestatus:
 
     def _parse_item_data(self, data, attribute_list):
         this_result = {}
-        data = data.split(';', len(attribute_list)-1)
+        data = data.split(';', len(attribute_list) - 1)
         for attribute_index in range(len(attribute_list)):
             if attribute_list[attribute_index] == u'custom_variables':
                 this_data = self._get_custom_data(data[attribute_index].encode('utf-8', 'replace'))
@@ -76,7 +76,8 @@ class Livestatus:
             return []
 
     def get_host(self, search_host):
-        query = u"GET hosts\nColumns: {}\nFilter: host_name = {}\nOutputFormat: csv\n\n".format(u' '.join(host), search_host)
+        query = u"GET hosts\nColumns: {}\nFilter: host_name = {}\nOutputFormat: csv\n\n".format(u' '.join(host),
+                                                                                                search_host)
         return self._get_by_query_single(query, host)
 
     def get_services(self, search_host):
@@ -84,7 +85,8 @@ class Livestatus:
             self.get_host(search_host)
         except NotFoundException:
             raise HostNotFoundException
-        query = u"GET services\nColumns: {}\nFilter: host_name = {}\nOutputFormat: csv\n\n".format(u' '.join(service), search_host)
+        query = u"GET services\nColumns: {}\nFilter: host_name = {}\nOutputFormat: csv\n\n".format(u' '.join(service),
+                                                                                                   search_host)
         return self._get_by_query_multi(query, service)
 
     def get_all_services(self):
@@ -105,6 +107,13 @@ class Livestatus:
         try:
             query = u"GET servicegroups\nColumns: {}\nOutputFormat: csv\n\n".format(u' '.join(servicegroup))
             return self._get_by_query_multi(query, servicegroup)
+        except NotFoundException:
+            return []
+
+    def get_downtime(self):
+        try:
+            query = u"GET downtimes\nColumns: {}\nOutputFormat: csv\n\n".format(u' '.join(downtimes))
+            return self._get_by_query_multi(query, downtimes)
         except NotFoundException:
             return []
 
@@ -149,4 +158,35 @@ class Livestatus:
     def set_host_downtime(self, host, user, comment, start, end):
         cmd = u"SCHEDULE_HOST_DOWNTIME;{host};{start};{end};{fixed};{trigger};{duration};{author};{comment}". \
             format(host=host, start=start, end=end, fixed=1, trigger=0, duration=0, author=user, comment=comment)
+        return self._send_command(cmd)
+
+    def set_service_downtime(self, host, service_description, user, comment, start, end):
+        cmd = u"SCHEDULE_SVC_DOWNTIME;{host};{service_description};{start};{end};{fixed};{trigger};{duration};" \
+              u"{author};{comment}". \
+            format(host=host, service_description=service_description, start=start, end=end, fixed=1, trigger=0,
+                   duration=0, author=user, comment=comment)
+        return self._send_command(cmd)
+
+    def del_downtime(self, id):
+        downtime = self.get_downtime()
+        is_service_downtime = False
+        found = False
+        for dwn in downtime:
+            if dwn['id'].decode("utf-8") == id:
+                found = True
+                is_service_downtime = dwn['is_service'].decode("utf-8") == "1"
+        if not found:
+            raise NotFoundException("Downtime not Found")
+
+        if is_service_downtime:
+            return self.__del_service_downtime(id)
+        else:
+            return self.__del_host_downtime(id)
+
+    def __del_service_downtime(self, id):
+        cmd = u"DEL_SVC_DOWNTIME;{id}".format(id=id)
+        return self._send_command(cmd)
+
+    def __del_host_downtime(self, id):
+        cmd = u"DEL_HOST_DOWNTIME;{id}".format(id=id)
         return self._send_command(cmd)
