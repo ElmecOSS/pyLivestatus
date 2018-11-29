@@ -154,6 +154,8 @@ service = [
     u"process_performance_data",
     u"retry_interval",
     u"scheduled_downtime_depth",
+    u"downtimes",
+    u"downtimes_with_info",
     u"service_description",
     u"should_be_scheduled",
     u"state_type",
@@ -161,7 +163,7 @@ service = [
     u"pnpgraph_present",
     u"plugin_output",
     u"check_command",
-    u"long_plugin_output"
+    u"long_plugin_output",
 ]
 
 hostgroup = [
