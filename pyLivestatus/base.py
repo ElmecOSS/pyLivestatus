@@ -190,3 +190,8 @@ class Livestatus:
     def __del_host_downtime(self, id):
         cmd = u"DEL_HOST_DOWNTIME;{id}".format(id=id)
         return self._send_command(cmd)
+
+    def restart_nagios(self):
+        cmd = "RESTART_PROCESS"
+        return self._send_command(cmd)
+
