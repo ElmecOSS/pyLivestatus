@@ -8,17 +8,36 @@ from .exceptions import HostNotFoundException, NotFoundException
 class Livestatus:
     ip = None
     port = None
+    dataset_separator = None
+    columns_separator = None
+    list_element_separator = None
+    service_list_separator = None
 
     def __init__(self, ip, port):
         self.ip = ip
         self.port = port
+        self.set_separator()
+
+    def set_separator(self, dataset_separator=10, columns_separator=59, list_element_separator=44,
+                      service_list_separator=124):
+        self.dataset_separator = dataset_separator
+        self.columns_separator = columns_separator
+        self.list_element_separator = list_element_separator
+        self.service_list_separator = service_list_separator
+
+    def _get_separator_command(self):
+
+        return "Separators: {} {} {} {}".format(self.dataset_separator, self.columns_separator,
+                                                self.list_element_separator, self.service_list_separator)
 
     def _send_raw_command(self, cmd, want_response=True):
         self.livestatus = telnetlib.Telnet(self.ip, self.port)
 
         self.livestatus.write(cmd.encode('utf-8'))
         if want_response:
-            response = self.livestatus.read_all().decode('utf-8', 'replace').rstrip(u'\n')
+
+            response = self.livestatus.read_all().decode('utf-8', 'replace').rstrip(
+                u'{}'.format(chr(self.dataset_separator)))
         else:
             response = u''
         self.livestatus.close()
@@ -28,12 +47,11 @@ class Livestatus:
         cmd = u"COMMAND [{}] {}\n\n".format(int(time.time()), cmd)
         return self._send_raw_command(cmd, want_response=False)
 
-    @staticmethod
-    def _get_custom_data(custom_data_list):
-        custom_data = custom_data_list.decode('utf-8').split(u',')
+    def _get_custom_data(self, custom_data_list):
+        custom_data = custom_data_list.decode('utf-8').split(u'{}'.format(chr(self.list_element_separator)))
         custom_data_list = {}
         for d in custom_data:
-            nagios_macro_data = str(d).split('|')
+            nagios_macro_data = str(d).split(u'{}'.format(chr(self.service_list_separator)))
             try:
                 custom_data_list[nagios_macro_data[0]] = nagios_macro_data[1]
             except IndexError:
@@ -42,12 +60,13 @@ class Livestatus:
 
     def _parse_item_data(self, data, attribute_list):
         this_result = {}
-        data = data.split(';', len(attribute_list) - 1)
+        data = data.split('{}'.format(chr(self.columns_separator)), len(attribute_list) - 1)
         for attribute_index in range(len(attribute_list)):
             if attribute_list[attribute_index] == u'custom_variables':
                 this_data = self._get_custom_data(data[attribute_index].encode('utf-8', 'replace'))
             elif attribute_list[attribute_index] == u'members':
-                this_data = data[attribute_index].encode('utf-8', 'replace').split(',')[:-1]
+                this_data = data[attribute_index].encode('utf-8', 'replace').split(
+                    '{}'.format(self.list_element_separator))[:-1]
             else:
                 this_data = data[attribute_index].encode('utf-8', 'replace')
             this_result[attribute_list[attribute_index]] = this_data
@@ -58,7 +77,7 @@ class Livestatus:
         if response == u'':
             raise HostNotFoundException
         all_results = []
-        for result in response.split(u'\n'):
+        for result in response.split(u'{}'.format(chr(self.dataset_separator))):
             all_results.append(self._parse_item_data(result, attribute_list))
         return all_results
 
@@ -70,14 +89,18 @@ class Livestatus:
 
     def get_hosts(self):
         try:
-            query = u"GET hosts\nColumns: " + u' '.join(host) + u'\nOutputFormat: csv\n\n'
+
+            query = u"GET hosts\nColumns: " + u' '.join(host) + u'\nOutputFormat: csv\n{}\n\n'.format(
+                self._get_separator_command())
             return self._get_by_query_multi(query, host)
         except NotFoundException:
             return []
 
     def get_host(self, search_host):
-        query = u"GET hosts\nColumns: {}\nFilter: host_name = {}\nOutputFormat: csv\n\n".format(u' '.join(host),
-                                                                                                search_host)
+
+        query = u"GET hosts\nColumns: {}\nFilter: host_name = {}\nOutputFormat: csv\n{}\n\n".format(u' '.join(host),
+                                                                                                    search_host,
+                                                                                                    self._get_separator_command())
         return self._get_by_query_single(query, host)
 
     def get_services(self, search_host):
@@ -85,27 +108,28 @@ class Livestatus:
             self.get_host(search_host)
         except NotFoundException:
             raise HostNotFoundException
-        query = u"GET services\nColumns: {}\nFilter: host_name = {}\nOutputFormat: csv\n\n".format(u' '.join(service),
-                                                                                                   search_host)
+        query = u"GET services\nColumns: {}\nFilter: host_name = {}\nOutputFormat: csv\n{}\n\n".format(
+            u' '.join(service),
+            search_host, self._get_separator_command())
         return self._get_by_query_multi(query, service)
 
     def get_all_services(self):
         try:
-            query = u"GET services\nColumns: {}\nOutputFormat: csv\n\n".format(u' '.join(service))
+            query = u"GET services\nColumns: {}\nOutputFormat: csv\n{}\n\n".format(u' '.join(service), self._get_separator_command())
             return self._get_by_query_multi(query, service)
         except NotFoundException:
             return []
 
     def get_hostgroups(self):
         try:
-            query = u"GET hostgroups\nColumns: {}\nOutputFormat: csv\n\n".format(u' '.join(hostgroup))
+            query = u"GET hostgroups\nColumns: {}\nOutputFormat: csv\n{}\n\n".format(u' '.join(hostgroup), self._get_separator_command())
             return self._get_by_query_multi(query, hostgroup)
         except NotFoundException:
             return []
 
     def get_servicegroups(self):
         try:
-            query = u"GET servicegroups\nColumns: {}\nOutputFormat: csv\n\n".format(u' '.join(servicegroup))
+            query = u"GET servicegroups\nColumns: {}\nOutputFormat: csv\n{}\n\n".format(u' '.join(servicegroup), )
             return self._get_by_query_multi(query, servicegroup)
         except NotFoundException:
             return []
@@ -194,4 +218,3 @@ class Livestatus:
     def restart_nagios(self):
         cmd = "RESTART_PROCESS"
         return self._send_command(cmd)
-
