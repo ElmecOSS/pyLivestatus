@@ -109,7 +109,7 @@ host = [
 service = [
     u"acknowledgement_type",
     u"active_checks_enabled",
-    u"check_execution_time",
+    u"execution_time",
     u"check_interval",
     u"check_latency",
     u"check_options",
@@ -141,7 +141,7 @@ service = [
     u"last_time_unknown",
     u"last_time_warning",
     u"last_update",
-    u"max_attempts",
+    u"max_check_attempts",
     u"modified_attributes",
     u"next_check",
     u"next_notification",
