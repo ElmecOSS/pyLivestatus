@@ -62,13 +62,16 @@ class Livestatus:
         this_result = {}
         data = data.split('{}'.format(chr(self.columns_separator)), len(attribute_list) - 1)
         for attribute_index in range(len(attribute_list)):
+            this_attribute_value = data[attribute_index].encode('utf-8', 'replace')
             if attribute_list[attribute_index] == u'custom_variables':
-                this_data = self._get_custom_data(data[attribute_index].encode('utf-8', 'replace'))
+                this_data = self._get_custom_data(this_attribute_value)
             elif attribute_list[attribute_index] == u'members':
-                this_data = data[attribute_index].encode('utf-8', 'replace').split(
-                    '{}'.format(self.list_element_separator))[:-1]
+                if this_attribute_value != b'':
+                    this_data = this_attribute_value.decode('utf-8').split(chr(self.list_element_separator))
+                else:
+                    this_data = []
             else:
-                this_data = data[attribute_index].encode('utf-8', 'replace')
+                this_data = this_attribute_value
             this_result[attribute_list[attribute_index]] = this_data
         return this_result
 
@@ -115,35 +118,40 @@ class Livestatus:
 
     def get_all_services(self):
         try:
-            query = u"GET services\nColumns: {}\nOutputFormat: csv\n{}\n\n".format(u' '.join(service), self._get_separator_command())
+            query = u"GET services\nColumns: {}\nOutputFormat: csv\n{}\n\n".format(u' '.join(service),
+                                                                                   self._get_separator_command())
             return self._get_by_query_multi(query, service)
         except NotFoundException:
             return []
 
     def get_hostgroups(self):
         try:
-            query = u"GET hostgroups\nColumns: {}\nOutputFormat: csv\n{}\n\n".format(u' '.join(hostgroup), self._get_separator_command())
+            query = u"GET hostgroups\nColumns: {}\nOutputFormat: csv\n{}\n\n".format(u' '.join(hostgroup),
+                                                                                     self._get_separator_command())
             return self._get_by_query_multi(query, hostgroup)
         except NotFoundException:
             return []
 
     def get_servicegroups(self):
         try:
-            query = u"GET servicegroups\nColumns: {}\nOutputFormat: csv\n{}\n\n".format(u' '.join(servicegroup), )
+            query = u"GET servicegroups\nColumns: {}\nOutputFormat: csv\n{}\n\n".format(u' '.join(servicegroup),
+                                                                                        self._get_separator_command())
             return self._get_by_query_multi(query, servicegroup)
         except NotFoundException:
             return []
 
     def get_downtime(self):
         try:
-            query = u"GET downtimes\nColumns: {}\nOutputFormat: csv\n\n".format(u' '.join(downtimes))
+            query = u"GET downtimes\nColumns: {}\nOutputFormat: csv\n{}\n\n".format(u' '.join(downtimes),
+                                                                                    self._get_separator_command())
             return self._get_by_query_multi(query, downtimes)
         except NotFoundException:
             return []
 
     def get_comments(self):
         try:
-            query = u"GET comments\nColumns: {}\nOutputFormat: csv\n\n".format(u' '.join(comment))
+            query = u"GET comments\nColumns: {}\nOutputFormat: csv\n{}\n\n".format(u' '.join(comment),
+                                                                                   self._get_separator_command())
             return self._get_by_query_multi(query, comment)
         except NotFoundException:
             return []
